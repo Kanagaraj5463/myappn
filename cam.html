@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta charset="utf-8">
+    <title>Camera</title>
+</head>
+<body background="https://thumbs.gfycat.com/ClearcutNaturalAnnelid-max-1mb.gif">
+    <style>
+        .button {
+          background-color: #946c04;
+          -webkit-border-radius: 20px;
+          border-radius: 60px;
+          border: none;
+          color: #060b01;
+          cursor: pointer;
+          display: inline-block;
+          font-family: sans-serif;
+          font-size: 24px;
+          padding: 10px 15px;
+          text-align: center;
+          text-decoration: none;
+        }
+        @keyframes glowing {
+          0% {
+            background-color: #1d6e04;
+            box-shadow: 0 1 5px #2ba805;
+          }
+          50% {
+            background-color: #0dae9b;
+            box-shadow: 1 0 20px #37cd09;
+          }
+          100% {
+            background-color: #2ba805;
+            box-shadow: 0 0 5px #2ba805;
+          }
+        }
+        .buttonn {
+            background-color: #c79007;
+            -webkit-border-radius: 20px;
+            border-radius: 60px;
+            border: none;
+            color: #060b01;
+            cursor: pointer;
+            display: inline-block;
+            font-family: sans-serif;
+            font-size: 24px;
+            padding: 10px 15px;
+            text-align: center;
+            text-decoration: none;
+          }
+          @keyframes glowing {
+            0% {
+              background-color: #2ba805;
+              box-shadow: 0 0 5px #2ba805;
+            }
+            50% {
+              background-color: #81f05f;
+              box-shadow: 1 0 20px #37cd09;
+            }
+            100% {
+              background-color: #4be91b;
+              box-shadow: 0 0 5px #2ba805;
+            }
+          }
+        .button {
+          animation: glowing 1600ms infinite;
+        }
+        .buttonn {
+            animation: glowing 11600ms infinite;
+          }
+      </style>
+    <div>
+        <h2 ><center>Smile Please</center></h2>
+        <center>
+            <video id="cameraPreview" width="600" height="400" autoplay></video>
+        </center>
+        <p ><cente>Please press the button to record viedos<br></center>
+        <p>
+            <center>
+                <br>
+                <button id="stotton" class="buttonn" onclick="stapture();">Please click the buttons to record the viedo</button>
+                <br><br>
+                <button id="startButton" class="button" onclick="startCapture();">Start</button>
+                <button id="stopButton" class="button" onclick="stopCapture();">Stop</button>
+            </center>
+
+        </p>
+            
+        </p>
+    </div>
+
+    <div>
+        <br><br><br>
+        <center><button id="stotton" class="buttonn" onclick="stapture();">Processing ...</button></center>
+        <center><canvas id="processingPreview" width="545" height="400"></canvas></center>
+    </div>
+
+    <div>
+        <center><button id="stotton" class="buttonn" onclick="stapture();">Recorded</button></center>
+        <center><h2>Recorded</h2>
+        <video id="recordingPreview" width="600" height="400" autoplay controls></video>
+        <p>
+            <a class="button" id="downloadButton">Download the viedo</a>
+        </p></center>
+    </div>
+
+    <script>
+
+    const ROI_X = 90;
+    const ROI_Y = 80;
+    const ROI_WIDTH = 900;
+    const ROI_HEIGHT = 600;
+    
+    const FPS = 24;
+    
+    let cameraStream = null;
+    let processingStream = null;
+    let mediaRecorder = null;
+    let mediaChunks = null;
+    let processingPreviewIntervalId = null;
+
+    function processFrame() {
+        let cameraPreview = document.getElementById("cameraPreview");
+        
+        processingPreview
+            .getContext('2d')
+            .drawImage(cameraPreview, ROI_X, ROI_Y, ROI_WIDTH, ROI_HEIGHT, 0, 0, ROI_WIDTH, ROI_HEIGHT);
+    }
+    
+    function generateRecordingPreview() {
+        let mediaBlob = new Blob(mediaChunks, { type: "video/mp4" });
+        let mediaBlobUrl = URL.createObjectURL(mediaBlob);
+        
+        let recordingPreview = document.getElementById("recordingPreview");
+        recordingPreview.src = mediaBlobUrl;
+
+        let downloadButton = document.getElementById("downloadButton");
+        downloadButton.href = mediaBlobUrl;
+        downloadButton.download = "Viedo.webm";
+    }
+        
+    function startCapture() {
+        const constraints = { video: true, audio: false };
+        navigator.mediaDevices.getUserMedia(constraints)
+        .then((stream) => {
+            cameraStream = stream;
+            
+            let processingPreview = document.getElementById("processingPreview");
+            processingStream = processingPreview.captureStream(FPS);
+            
+            mediaRecorder = new MediaRecorder(processingStream);
+            mediaChunks = []
+            
+            mediaRecorder.ondataavailable = function(event) {
+                mediaChunks.push(event.data);
+                if(mediaRecorder.state == "inactive") {
+                    generateRecordingPreview();
+                }
+            };
+            
+            mediaRecorder.start();
+            
+            let cameraPreview = document.getElementById("cameraPreview");
+            cameraPreview.srcObject = stream;
+        
+            processingPreviewIntervalId = setInterval(processFrame, 1000 / FPS);
+        })
+        .catch((err) => {
+            alert("No media device found!");
+        });
+    };
+    
+    function stopCapture() {
+        if(cameraStream != null) {
+            cameraStream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+        }
+        
+        if(processingStream != null) {
+            processingStream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+        }
+        
+        if(mediaRecorder != null) {
+            if(mediaRecorder.state == "recording") {
+                mediaRecorder.stop();
+            }
+        }
+        
+        if(processingPreviewIntervalId != null) {
+            clearInterval(processingPreviewIntervalId);
+            processingPreviewIntervalId = null;
+        }
+    };
+    </script>
+</body>
+</html>
