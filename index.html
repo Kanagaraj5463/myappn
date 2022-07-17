@@ -354,7 +354,7 @@
                 <div class="col-lg-10 mx-auto">
                   <div class="box">
                     <div class="img-box">
-                      <img src="images/pp.jpg" alt="">
+                      <img class="ele" src="images/pp.jpg" alt="">
                     </div>
                     <div class="detail-box">
                       <div class="client_info">
@@ -386,7 +386,28 @@
                 <div class="col-md-10 mx-auto">
                   <div class="box">
                     <div class="img-box">
-                      <img src="images/bala.png" alt="">
+                      <style>
+                      .ele {
+                        box-shadow: 0px 0px 6px 2px rgb(255, 255, 33);
+                        animation: glowShadow 2s linear infinite alternate;
+                      }
+                      pics {
+                        animation: glowImage 2s linear infinite alternate;
+                      }
+                      
+                      @keyframes glowShadow{
+                        to {
+                          box-shadow: 0px 0px 0px 3px #ff6c3c;
+                        }
+                      }
+                      
+                      @keyframes glowImage{
+                        to {
+                          -webkit-filter: brightness(2);
+                        }
+                      } 
+                      </style>
+                      <img class="ele" src="images/bala.png" alt="">
                     </div>
                     <div class="detail-box">
                       <div class="client_info">
@@ -418,7 +439,7 @@
                 <div class="col-md-10 mx-auto">
                   <div class="box">
                     <div class="img-box">
-                      <img src="images/client.jpeg" alt="">
+                      <img class="ele" src="images/client.jpeg" alt="">
                     </div>
                     <div class="detail-box">
                       <div class="client_info">
